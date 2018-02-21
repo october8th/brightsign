@@ -1,0 +1,92 @@
+<html>
+<script>
+  var myfavs;
+  var mysql;
+  var connection;
+
+// Load the http module to create an http server.
+  
+
+
+
+function displayMessage()
+{
+    // Load the http module to create an http server.
+  var http = require('http');
+  // Configure our HTTP server to respond with Hello World to all requests.
+  var server = http.createServer(function (request, response) {
+    var device_info = new BSDeviceInfo();
+    response.writeHead(200, {"Content-Type": "text/plain"});
+    response.end("Device Information:\n" + device_info.model + "\n" + device_info.bootVersion + "\n");
+    var ip = request.connection.remoteAddress;
+    document.getElementById("Ip").innerHTML+="Server responded to: "+ ip + "<br>";
+    console.log("Server responded to request from " + ip);
+    getsql();
+  });
+ 
+  // Listen on port 8000, IP defaults to 127.0.0.1
+  server.listen(8000);
+ 
+  // Display it on brightsign browser
+  var os = require('os');
+  var interfaces = os.networkInterfaces();
+  var addresses = [];
+  for (var k in interfaces) {
+      for (var k2 in interfaces[k]) {
+          var address = interfaces[k][k2];
+          if (address.family === 'IPv4' && !address.internal) {
+              addresses.push(address.address);
+          }
+      }
+  }
+  var message = "Server running at: " + addresses[0] + ":8000<br>";
+  document.getElementById("Ip").innerHTML+= message;
+ 
+  // Print message on console
+  console.log(message);
+ 
+}
+
+function getsql()
+{
+  document.getElementById("favs").innerHTML+= "I'm trying";
+  mysql = require('mysql');
+  connection = mysql.createConnection(
+  {
+    host:"10.10.10.102",
+    port:3306,
+    user:"root",
+    password:"password1",
+    database:"playlistdb"
+  });
+
+  connection.connect(function(err)
+    {
+      connection.query("SELECT * FROM myjams",
+      function(err,res)
+      {
+        if(err) throw err;
+        myfavs = "elephant elephant";
+        document.getElementById("favs").innerHTML+= myfavs;
+        var message = myfavs + "<br>";
+        document.getElementById("favs").innerHTML+= res;
+        console.log(res);
+        connection.end();
+      });
+    });
+
+}
+
+
+</script>
+<body style="background-color:red" onload="displayMessage()">
+  <div id = "Ip" style="font-size:60px; text-align:center;">
+  </div>
+  <div>
+    hello world!!!
+  </div>
+  <div id = "favs" style="font-size:60px; text-align:center;">
+    some favs 3!
+  </div>
+</body>
+</html>
